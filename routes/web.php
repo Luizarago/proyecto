@@ -55,3 +55,5 @@ Route::get('/404', function () {
 Route::get('/500', function () {
     return view('pages.500');
 });
+
+Route::post('/venta/ticket', [VentaController::class, 'generarTicket'])->name('venta.ticket');

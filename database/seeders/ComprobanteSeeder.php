@@ -15,7 +15,7 @@ class ComprobanteSeeder extends Seeder
     {
         Comprobante::insert([
             [
-                'tipo_comprobante' => 'Boleta'
+                'tipo_comprobante' => 'Ticket'
             ],
             [
                 'tipo_comprobante' => 'Factura'

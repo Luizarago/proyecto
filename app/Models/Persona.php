@@ -9,17 +9,33 @@ class Persona extends Model
 {
     use HasFactory;
 
-    public function documento(){
+    protected $fillable = [
+        'razon_social',
+        'direccion',
+        'tipo_persona',
+        'documento_id',
+        'numero_documento'
+    ];
+
+    // Relación con el modelo Documento
+    public function documento()
+    {
         return $this->belongsTo(Documento::class);
     }
 
-    public function proveedore(){
+    public function proveedore()
+    {
         return $this->hasOne(Proveedore::class);
     }
 
-    public function cliente(){
+    public function cliente()
+    {
         return $this->hasOne(Cliente::class);
     }
 
-    protected $fillable = ['razon_social','direccion','tipo_persona','documento_id','numero_documento'];
+    // Accesor para obtener el tipo de documento completo
+    public function getDocumentoCompletoAttribute()
+    {
+        return $this->documento->tipo_documento . ': ' . $this->numero_documento;
+    }
 }

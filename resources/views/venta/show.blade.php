@@ -82,7 +82,7 @@
                 <div class="col-sm-6">
                     <div class="input-group">
                         <span title="Cliente" class="input-group-text" id="icon-form"><i class="fa-solid fa-user-tie"></i></span>
-                        <input disabled type="text" class="form-control" value="{{$venta->cliente->persona->razon_social}}">
+                        <input disabled type="text" class="form-control" value="{{ $venta->cliente ? $venta->cliente->persona->razon_social : 'Cliente no registrado' }}">
                     </div>
                 </div>
             </div>

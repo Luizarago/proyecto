@@ -5,18 +5,65 @@
 @push('css-datatable')
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
 @endpush
+
 @push('css')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     .row-not-space {
         width: 110px;
     }
+    .btn-group .btn {
+        margin-right: 5px;
+        border-radius: 5px !important;
+    }
+    .btn-info {
+        color: white;
+        border-radius: 5px !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn-info i {
+        font-size: 14px;
+    }
 </style>
 @endpush
 
 @section('content')
-
 @include('layouts.partials.alert')
+
+@if(session('pdf_url'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let pdfUrl = '{{ session("pdf_url") }}';
+            console.log('PDF URL:', pdfUrl);
+            
+            setTimeout(() => {
+                fetch(pdfUrl)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (response.ok) {
+                            window.open(pdfUrl, '_blank');
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo acceder al PDF: ' + response.status
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al intentar abrir el PDF'
+                        });
+                    });
+            }, 1000);
+        });
+    </script>
+@endif
 
 <div class="container-fluid px-4">
     <h1 class="mt-4 text-center">Ventas</h1>
@@ -58,34 +105,46 @@
                             <p class="text-muted mb-0">{{$item->numero_comprobante}}</p>
                         </td>
                         <td>
-                            <p class="fw-semibold mb-1">{{ ucfirst($item->cliente->persona->tipo_persona) }}</p>
-                            <p class="text-muted mb-0">{{$item->cliente->persona->razon_social}}</p>
+                            @if($item->cliente && $item->cliente->persona)
+                                <p class="fw-semibold mb-1">{{ ucfirst($item->cliente->persona->tipo_persona) }}</p>
+                                <p class="text-muted mb-0">{{$item->cliente->persona->razon_social}}</p>
+                            @else
+                                <p class="fw-semibold mb-1">Cliente no registrado</p>
+                            @endif
                         </td>
                         <td>
                             <div class="row-not-space">
-                                <p class="fw-semibold mb-1"><span class="m-1"><i class="fa-solid fa-calendar-days"></i></span>{{\Carbon\Carbon::parse($item->fecha_hora)->format('d-m-Y')}}</p>
-                                <p class="fw-semibold mb-0"><span class="m-1"><i class="fa-solid fa-clock"></i></span>{{\Carbon\Carbon::parse($item->fecha_hora)->format('H:i')}}</p>
+                                <p class="fw-semibold mb-1">
+                                    <span class="m-1"><i class="fa-solid fa-calendar-days"></i></span>
+                                    {{\Carbon\Carbon::parse($item->fecha_hora)->format('d-m-Y')}}
+                                </p>
+                                <p class="fw-semibold mb-0">
+                                    <span class="m-1"><i class="fa-solid fa-clock"></i></span>
+                                    {{\Carbon\Carbon::parse($item->fecha_hora)->format('H:i')}}
+                                </p>
                             </div>
                         </td>
+                        <td>{{$item->user->name}}</td>
+                        <td>{{$item->total}}</td>
                         <td>
-                            {{$item->user->name}}
-                        </td>
-                        <td>
-                            {{$item->total}}
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-
+                            <div class="btn-group" role="group">
                                 @can('mostrar-venta')
                                 <form action="{{route('ventas.show', ['venta'=>$item]) }}" method="get">
-                                    <button type="submit" class="btn btn-success">
-                                        Ver
-                                    </button>
+                                    <button type="submit" class="btn btn-success">Ver</button>
                                 </form>
                                 @endcan
 
+                                <a href="{{ url('storage/tickets/' . ($item->comprobante_id == 2 ? 'factura_' : 'ticket_') . $item->numero_ticket . '.pdf') }}" 
+                                   target="_blank" 
+                                   class="btn btn-info">
+                                    <i class="fas fa-file-pdf"></i> 
+                                    {{ $item->comprobante_id == 2 ? 'Factura' : 'Ticket' }}
+                                </a>
+
                                 @can('eliminar-venta')
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal-{{$item->id}}">Eliminar</button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal-{{$item->id}}">
+                                    Eliminar
+                                </button>
                                 @endcan
                             </div>
                         </td>
@@ -118,17 +177,14 @@
             </table>
         </div>
     </div>
-
 </div>
 @endsection
 
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 <script>
-    // Simple-DataTables
-    // https://github.com/fiduswriter/Simple-DataTables/wiki
     window.addEventListener('DOMContentLoaded', event => {
-        const dataTable = new simpleDatatables.DataTable("#datatablesSimple", {})
+        const dataTable = new simpleDatatables.DataTable("#datatablesSimple", {});
     });
 </script>
 @endpush

@@ -16,7 +16,8 @@ class Producto extends Model
         'descripcion',
         'fecha_vencimiento',
         'marca_id',
-        'img_path'
+        'img_path',
+        'stock' 
     ];
 
     public function compras()
@@ -41,14 +42,11 @@ class Producto extends Model
         return $this->belongsTo(Marca::class);
     }
 
-   
-
     public function handleUploadImage($image)
     {
         $file = $image;
         $name = time() . $file->getClientOriginalName();
-        //$file->move(public_path() . '/img/productos/', $name);
-        Storage::putFileAs('/public/productos/',$file,$name,'public');
+        Storage::putFileAs('/public/productos/', $file, $name, 'public');
 
         return $name;
     }

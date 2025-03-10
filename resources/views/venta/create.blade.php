@@ -142,29 +142,31 @@
                     <div class="row gy-4">
                         <!--Cliente-->
                         <div class="col-12">
-                            <label for="cliente_id" class="form-label">Cliente:</label>
-                            <select name="cliente_id" id="cliente_id" class="form-control selectpicker show-tick" data-live-search="true" title="Selecciona" data-size='2'>
-                                @foreach ($clientes as $item)
-                                <option value="{{$item->id}}">{{$item->persona->razon_social}}</option>
-                                @endforeach
-                            </select>
-                            @error('cliente_id')
-                            <small class="text-danger">{{ '*'.$message }}</small>
-                            @enderror
-                        </div>
+    <label for="cliente_id" class="form-label">Cliente (opcional):</label>
+    <select name="cliente_id" id="cliente_id" class="form-control selectpicker show-tick" data-live-search="true" title="Selecciona" data-size='2'>
+        <option value="">Seleccione un cliente</option> <!-- Opción vacía -->
+        @foreach ($clientes as $item)
+        <option value="{{$item->id}}">{{$item->persona->razon_social}}</option>
+        @endforeach
+    </select>
+    @error('cliente_id')
+    <small class="text-danger">{{ '*'.$message }}</small>
+    @enderror
+</div>
 
-                        <!--Tipo de comprobante-->
-                        <div class="col-12">
-                            <label for="comprobante_id" class="form-label">Comprobante:</label>
-                            <select name="comprobante_id" id="comprobante_id" class="form-control selectpicker" title="Selecciona">
-                                @foreach ($comprobantes as $item)
-                                <option value="{{$item->id}}">{{$item->tipo_comprobante}}</option>
-                                @endforeach
-                            </select>
-                            @error('comprobante_id')
-                            <small class="text-danger">{{ '*'.$message }}</small>
-                            @enderror
-                        </div>
+                        <!-- Tipo de comprobante -->
+<div class="col-12">
+    <label for="comprobante_id" class="form-label">Comprobante:</label>
+    <select name="comprobante_id" id="comprobante_id" class="form-control selectpicker" title="Selecciona">
+        @foreach ($comprobantes as $item)
+        <option value="{{$item->id}}">{{$item->tipo_comprobante}}</option>
+        @endforeach
+    </select>
+    @error('comprobante_id')
+    <small class="text-danger">{{ '*'.$message }}</small>
+    @enderror
+</div>
+
 
                         <!--Numero de comprobante-->
                         <div class="col-12">
@@ -229,8 +231,16 @@
             </div>
         </div>
     </div>
+    </form>
+    <form action="{{ route('venta.ticket') }}" method="post" id="ticketForm" style="display: none;">
+        @csrf
+        <input type="hidden" name="comprobante_id" id="ticket_comprobante_id">
+        <input type="hidden" name="cliente_id" id="ticket_cliente_id">
+        <input type="hidden" name="productos" id="ticket_productos">
+        <input type="hidden" name="total" id="ticket_total">
+    </form>
 
-</form>
+
 @endsection
 
 @push('js')
@@ -388,6 +398,19 @@
         limpiarCampos();
         disableButtons();
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        const comprobanteSelect = document.getElementById('comprobante_id');
+        const generarButton = document.getElementById('generarButton');
+
+        comprobanteSelect.addEventListener('change', function() {
+            const selectedOption = comprobanteSelect.options[comprobanteSelect.selectedIndex].text;
+            if (selectedOption.toLowerCase() === 'factura') {
+                generarButton.textContent = 'Generar Factura';
+            } else {
+                generarButton.textContent = 'Generar Ticket';
+            }
+        });
+    });
 
     function disableButtons() {
         if (total == 0) {
@@ -439,6 +462,37 @@
         num = num.toString().split('e');
         return signo * (num[0] + 'e' + (num[1] ? (+num[1] - decimales) : -decimales));
     }
+    function generarTicket() {
+    // Obtener los datos necesarios del formulario principal
+    const comprobante_id = document.getElementById('comprobante_id').value;
+    const cliente_id = document.getElementById('cliente_id').value;
+    const total = document.getElementById('inputTotal').value;
+
+    // Obtener los productos de la tabla
+    let productos = [];
+    const filas = document.querySelectorAll('#tabla_detalle tbody tr');
+    filas.forEach(fila => {
+        if (fila.querySelector('input[name="arrayidproducto[]"]')) {
+            productos.push({
+                id: fila.querySelector('input[name="arrayidproducto[]"]').value,
+                nombre: fila.querySelector('td:nth-child(2)').innerText, // Obtener el nombre del producto
+                cantidad: fila.querySelector('input[name="arraycantidad[]"]').value,
+                precio: fila.querySelector('input[name="arrayprecioventa[]"]').value,
+                descuento: fila.querySelector('input[name="arraydescuento[]"]').value,
+                total: fila.querySelector('td:nth-child(6)').innerText // Obtener el subtotal
+            });
+        }
+    });
+
+    // Asignar los valores al formulario del ticket
+    document.getElementById('ticket_comprobante_id').value = comprobante_id;
+    document.getElementById('ticket_cliente_id').value = cliente_id;
+    document.getElementById('ticket_productos').value = JSON.stringify(productos);
+    document.getElementById('ticket_total').value = total;
+
+    // Enviar el formulario del ticket
+    document.getElementById('ticketForm').submit();
+}
     //Fuente: https://es.stackoverflow.com/questions/48958/redondear-a-dos-decimales-cuando-sea-necesario
 </script>
 @endpush
