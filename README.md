@@ -1,6 +1,3 @@
-------------
-![Img](https://github.com/SakNoelCode/Imagenes_Proyectos/blob/master/sistemaAbarrotePanel.png)
-
 # Punto de Venta para una tienda
 
 ## Dependencias
@@ -43,13 +40,13 @@ DB_PASSWORD=
 ```bash
 php artisan key:generate 
 ```
-- Ingrese al administrador de [PHP MyAdmin](http://localhost/phpmyadmin/) y cree una nueva base de datos, el nombre es opcional, pero por defecto nombrarla **dbsistemaventas**
+- Entra al administrador de [PHP MyAdmin](http://localhost/phpmyadmin/) o a otra bd en su defecto y cree una nueva base de datos, el nombre es opcional, pero por defecto nombrarla **dbsistemaventas**
 
 - Correr la migraciones del proyecto
 ```bash
 php artisan migrate
 ```
-- Ejecute los seeders, esto creará un usuario administrador, puede revisar las credenciales en el archivo (**database/seeders/UserSeeder**)
+- Ejecute los seeders, esto creará un usuario administrador, puedes revisar las credenciales en el archivo (**database/seeders/UserSeeder**)
 ```bash
 php artisan db:seed
 ```
@@ -57,14 +54,3 @@ php artisan db:seed
 ```bash
 php artisan serve
 ```
-
-## Notas
-- Obtenga más información sobre este proyecto [aquí](https://universityproyectx.blogspot.com/2022/10/sistema-de-ventas-web-minersa-srl.html).
-- [FAQ sobre el proyecto](https://universityproyectx.blogspot.com/2023/06/faq-sobre-el-sistema-de-ventas-de.html)
-
-## Licencia
-- Este proyecto está licenciado bajo la Licencia MIT. Para más información, consulta el archivo [LICENSE](LICENSE).
-- Obtenga más información sobre esta licencia  [MIT license](https://opensource.org/licenses/MIT).
-
-------------
-![Img](https://github.com/SakNoelCode/Imagenes_Proyectos/blob/master/sistemaAbarrotecategory.png)
