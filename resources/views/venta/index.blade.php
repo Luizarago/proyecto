@@ -38,33 +38,18 @@
             let pdfUrl = '{{ session("pdf_url") }}';
             console.log('PDF URL:', pdfUrl);
             
-            setTimeout(() => {
-                fetch(pdfUrl)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (response.ok) {
-                            window.open(pdfUrl, '_blank');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'No se pudo acceder al PDF: ' + response.status
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Error al intentar abrir el PDF'
-                        });
-                    });
-            }, 1000);
+            // Intentar abrir el PDF directamente
+            window.open(pdfUrl, '_blank');
+
+            // Mostrar mensaje de éxito
+            Swal.fire({
+                icon: 'success',
+                title: 'Venta registrada',
+                text: 'El documento se abrirá en una nueva ventana'
+            });
         });
     </script>
 @endif
-
 <div class="container-fluid px-4">
     <h1 class="mt-4 text-center">Ventas</h1>
     <ol class="breadcrumb mb-4">
@@ -135,11 +120,11 @@
                                 @endcan
 
                                 <a href="{{ url('storage/tickets/' . ($item->comprobante_id == 2 ? 'factura_' : 'ticket_') . $item->numero_ticket . '.pdf') }}" 
-                                   target="_blank" 
-                                   class="btn btn-info">
-                                    <i class="fas fa-file-pdf"></i> 
-                                    {{ $item->comprobante_id == 2 ? 'Factura' : 'Ticket' }}
-                                </a>
+   target="_blank" 
+   class="btn btn-info">
+    <i class="fas fa-file-pdf"></i> 
+    {{ $item->comprobante_id == 2 ? 'Factura' : 'Ticket' }}
+</a>
 
                                 @can('eliminar-venta')
                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal-{{$item->id}}">

@@ -165,7 +165,6 @@ public function store(StoreVentaRequest $request)
             $precioVenta = $request->get('arrayprecioventa')[$i];
             $porcentajeDescuento = $request->get('arraydescuento')[$i];
 
-            // Calcular descuento como porcentaje
             $subtotalProducto = $cantidad * $precioVenta;
             $importeDescuento = ($subtotalProducto * $porcentajeDescuento) / 100;
             $totalProducto = $subtotalProducto - $importeDescuento;
@@ -219,41 +218,64 @@ public function store(StoreVentaRequest $request)
             ]
         ];
 
+        // Definir rutas y nombre del archivo
+        $storagePath = storage_path('app/public');
+        $ticketsPath = $storagePath . '/tickets';
         $vista = $isFactura ? 'tickets.factura' : 'tickets.ticket';
         $fileName = $isFactura ? 
             "factura_{$venta->numero_ticket}.pdf" : 
             "ticket_{$venta->numero_ticket}.pdf";
+        $fullPath = $ticketsPath . '/' . $fileName;
 
-        $pdf = PDF::loadView($vista, $data);
-
-        $pdfPath = public_path('storage/tickets');
-        if (!file_exists($pdfPath)) {
-            mkdir($pdfPath, 0755, true);
+        // Crear directorios si no existen
+        foreach ([$storagePath, $ticketsPath] as $path) {
+            if (!file_exists($path)) {
+                if (!mkdir($path, 0755, true)) {
+                    throw new Exception("No se pudo crear el directorio: {$path}");
+                }
+            }
         }
 
-        Log::info('Guardando PDF en:', [
-            'path' => $pdfPath,
-            'fileName' => $fileName,
-            'fullPath' => $pdfPath . '/' . $fileName
-        ]);
+        // Generar y guardar PDF
+        try {
+            $pdf = PDF::loadView($vista, $data);
+            $pdf->save($fullPath);
 
-        $pdf->save($pdfPath . '/' . $fileName);
+            // Verificar que el archivo se creó y es legible
+            if (!file_exists($fullPath) || !is_readable($fullPath)) {
+                throw new Exception("Error al crear o leer el archivo PDF");
+            }
+
+            // Establecer permisos correctos
+            chmod($fullPath, 0644);
+
+        } catch (Exception $e) {
+            throw new Exception("Error al generar el PDF: " . $e->getMessage());
+        }
+
+        // Registrar información en el log
+        Log::info('PDF creado exitosamente', [
+            'nombre_archivo' => $fileName,
+            'ruta' => $fullPath,
+            'tamaño' => filesize($fullPath),
+            'permisos' => substr(sprintf('%o', fileperms($fullPath)), -4)
+        ]);
 
         DB::commit();
 
+        // Retornar con la URL pública
         return redirect()->route('ventas.index')
             ->with('success', $isFactura ? 'Factura generada correctamente' : 'Ticket generado correctamente')
-            ->with('pdf_url', url("storage/tickets/{$fileName}"));
+            ->with('pdf_url', asset("storage/tickets/{$fileName}"));
 
     } catch (Exception $e) {
         DB::rollBack();
         Log::error("Error en la venta: " . $e->getMessage());
-        Log::error("Trace: " . $e->getTraceAsString());
+        Log::error("Traza: " . $e->getTraceAsString());
         return redirect()->route('ventas.index')
             ->with('error', 'Error en la venta: ' . $e->getMessage());
     }
 }
-
 
 private function generateSequentialTicketNumber()
 {

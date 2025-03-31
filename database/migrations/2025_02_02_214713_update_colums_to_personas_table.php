@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //Eliminar la nueva llave foránea
+        
         Schema::table('personas', function (Blueprint $table) {
             $table->dropForeign(['documento_id']);
             $table->dropColumn('documento_id');
@@ -44,7 +44,7 @@ return new class extends Migration
             $table->foreignId('documento_id')->after('estado')->unique()->constrained('documentos')->onDelete('cascade');
         });
 
-        //Eliminar el campo numero_documento
+        
         Schema::table('personas', function (Blueprint $table) {
             $table->dropColumn('numero_documento');
         });
