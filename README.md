@@ -27,6 +27,8 @@ composer -v
 ```bash
 composer install
 ```
+- Si el comando anterior da fallo hará falta activar mediante el php.ini la extension zip (buscaremos en el txt de php.ini ;extension=zip y le quitaremos el punto y coma del principio ya que eso lo comenta) 
+
 - En el directorio raíz encontrará el arhivo **.env.example**, dupliquelo, al archivo duplicado cambiar de nombre como **.env**, este archivo se debe modificar según las configuraciones de nuestro proyecto. Ahí se muestran como debería quedar
 ```bash
 DB_CONNECTION=mysql
