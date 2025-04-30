@@ -1,4 +1,4 @@
-# Punto de Venta para una tienda
+# PosPrime
 
 ## Dependencias
 - Se debe tener instalado [XAMPP](https://www.apachefriends.org/es/download.html "XAMPP") (versión **PHP** **8.1** o superior)  
