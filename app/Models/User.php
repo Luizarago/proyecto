@@ -2,47 +2,36 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+// Modelo que representa a un usuario del sistema (por defecto en Laravel).
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Campos que se pueden guardar o actualizar desde formularios o peticiones.
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    // Estos campos no se muestran cuando se convierte el usuario a JSON.
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+    // Convierte automáticamente el campo email_verified_at a tipo fecha.
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
+    // Un usuario puede tener muchas ventas asociadas.
     public function ventas(){
         return $this->hasMany(Venta::class);
     }
