@@ -11,7 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class categoriaController extends Controller
 {
-
+    /**
+    * Constructor del controlador.
+    * Asigna permisos a cada acción usando middlewares.
+    * Así, solo los usuarios con el permiso adecuado pueden ver, crear, editar o eliminar categorías.
+    */
     function __construct()
     {
         $this->middleware('permission:ver-categoria|crear-categoria|editar-categoria|eliminar-categoria', ['only' => ['index']]);
@@ -21,8 +25,10 @@ class categoriaController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
+     * Muestra el listado de todas las categorías.
+    * Obtiene todas las categorías junto con su característica asociada, ordenadas de la más reciente a la más antigua.
+    * Luego, envía esos datos a la vista 'categoria.index' para mostrarlos al usuario.
+    */
     public function index()
     {
         $categorias = Categoria::with('caracteristica')->latest()->get();
@@ -31,16 +37,21 @@ class categoriaController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
+    * Muestra el formulario para crear una nueva categoría.
+    * Simplemente devuelve la vista 'categoria.create' donde el usuario puede rellenar los datos.
+    */
     public function create()
     {
         return view('categoria.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
+    * Guarda una nueva categoría en la base de datos.
+    * Primero crea una característica con los datos validados del formulario.
+    * Luego crea la categoría asociada a esa característica.
+    * Si todo va bien, guarda los cambios; si hay error, deshace la operación.
+    * Al finalizar, redirige al listado de categorías con un mensaje de éxito.
+    */
     public function store(StoreCaracteristicaRequest $request)
     {
         try {
@@ -66,16 +77,19 @@ class categoriaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
+    * Muestra el formulario para editar una categoría existente.
+    * Envía los datos de la categoría seleccionada a la vista 'categoria.edit' para que el usuario pueda modificarlos.
+    */
     public function edit(Categoria $categoria)
     {
         return view('categoria.edit', ['categoria' => $categoria]);
     }
 
     /**
-     * Update the specified resource in storage.
-     */
+    * Actualiza la característica asociada a la categoría seleccionada.
+    * Usa los datos validados del formulario para modificar la característica.
+    * Al terminar, redirige al listado de categorías con un mensaje de éxito.
+    */
     public function update(UpdateCategoriaRequest $request, Categoria $categoria)
     {
         Caracteristica::where('id', $categoria->caracteristica->id)
@@ -85,8 +99,11 @@ class categoriaController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
+    * Elimina o restaura una categoría cambiando el estado de su característica.
+    * Si la característica está activa (estado 1), la desactiva (estado 0) y muestra mensaje de eliminada.
+    * Si ya está desactivada, la vuelve a activar (estado 1) y muestra mensaje de restaurada.
+    * Al final, redirige al listado de categorías con el mensaje correspondiente.
+    */
     public function destroy(string $id)
     {
         $message = '';
